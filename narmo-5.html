@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>نرمو؛ دستیار سلامتی</title>
+<style>
+:root{--bg:#eef7f6;--card:#fff;--ink:#17333a;--sub:#5b7a80;--acc:#19b5a5;--acc2:#ff6b6b;--bot:#dff3f0;--usr:#e8eefc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1f22;--card:#172c30;--ink:#e6f4f2;--sub:#8fb0b3;--bot:#1f3b3f;--usr:#26324f}}
+:root[data-theme="dark"]{--bg:#0f1f22;--card:#172c30;--ink:#e6f4f2;--sub:#8fb0b3;--bot:#1f3b3f;--usr:#26324f}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:Vazirmatn,Tahoma,system-ui,sans-serif;display:flex;justify-content:center}
+.app{width:100%;max-width:460px;display:flex;flex-direction:column;padding:10px 14px;gap:8px;height:100%}
+h1{font-size:18px;margin:0;text-align:center}
+.status{text-align:center;color:var(--sub);font-size:13px;min-height:18px}
+svg{width:100%;max-height:34vh;flex:none}
+.eye{transform-origin:center;transform-box:fill-box;animation:blink 4s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.mouth{transform-origin:center;transform-box:fill-box;transform:scaleY(.4)}
+.talking .mouth{animation:talk .28s infinite alternate}
+@keyframes talk{to{transform:scaleY(1.5)}}
+.heart{animation:beat 1.2s infinite;transform-origin:center;transform-box:fill-box}
+@keyframes beat{50%{transform:scale(1.25)}}
+.listening .heart{fill:var(--acc2)}
+.beam{opacity:0}
+.scanning .beam{opacity:1;animation:sweep 1.3s ease-in-out infinite alternate}
+@keyframes sweep{from{transform:translateY(0)}to{transform:translateY(150px)}}
+.float{animation:fl 3s ease-in-out infinite}
+@keyframes fl{50%{transform:translateY(-5px)}}
+#cam{position:relative;width:100%;height:32vh;border-radius:18px;overflow:hidden;border:3px solid var(--acc);flex:none;background:#000}
+#cam[hidden]{display:none}
+#vid{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.cbeam{position:absolute;left:0;right:0;top:0;height:6px;background:var(--acc);box-shadow:0 0 18px 8px #19b5a588;opacity:0}
+#cam.scanning .cbeam{opacity:1;animation:csweep 1.4s ease-in-out infinite alternate}
+@keyframes csweep{to{top:calc(100% - 6px)}}
+.cfg{background:var(--card);border:1px solid var(--acc);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px;font-size:12px;flex:none}
+.cfg[hidden]{display:none}
+.cfg select,.cfg input{width:100%;flex:none;border:1px solid var(--sub);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px;font:inherit;font-size:13px;direction:ltr}
+.cfg button{background:var(--acc);color:#fff;padding:8px}
+.msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;min-height:80px}
+.m{padding:8px 12px;border-radius:14px;max-width:85%;font-size:14px;line-height:1.7}
+.m.bot{background:var(--bot);align-self:flex-start;border-top-right-radius:4px}
+.m.usr{background:var(--usr);align-self:flex-end;border-top-left-radius:4px}
+.scan{background:var(--card);border:1px solid var(--acc);border-radius:14px;padding:8px 12px;font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.row{display:flex;gap:8px;align-items:center}
+button{font:inherit;border:0;cursor:pointer;border-radius:999px}
+#mic{width:64px;height:64px;background:var(--acc);color:#fff;font-size:26px;flex:none;box-shadow:0 4px 14px #19b5a566}
+#mic.on{background:var(--acc2);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+#scanBtn{background:var(--card);color:var(--ink);border:2px solid var(--acc);padding:12px 16px;font-size:14px}
+input{flex:1;min-width:0;border:1px solid var(--sub);background:var(--card);color:var(--ink);border-radius:999px;padding:12px 14px;font:inherit;font-size:14px}
+.note{font-size:11px;color:var(--sub);text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="row" style="justify-content:center;gap:12px"><h1>نرمو 🤖 دستیار سلامتی</h1><button id="lng" style="background:var(--card);color:var(--ink);border:2px solid var(--acc);padding:4px 12px;font-size:13px">EN</button><button id="cfgBtn" aria-label="تنظیمات هوش مصنوعی" style="background:var(--card);color:var(--ink);border:2px solid var(--acc);padding:4px 10px;font-size:14px">⚙️</button></div>
+<svg id="bot" viewBox="0 0 200 230" aria-label="ربات نرمو">
+ <g class="float">
+  <line x1="100" y1="22" x2="100" y2="40" stroke="#9bd9d1" stroke-width="4"/>
+  <circle cx="100" cy="18" r="7" fill="#19b5a5"/>
+  <rect x="38" y="95" width="124" height="115" rx="55" fill="#f4fbfa" stroke="#9bd9d1" stroke-width="3"/>
+  <ellipse cx="38" cy="140" rx="14" ry="26" fill="#f4fbfa" stroke="#9bd9d1" stroke-width="3"/>
+  <ellipse cx="162" cy="140" rx="14" ry="26" fill="#f4fbfa" stroke="#9bd9d1" stroke-width="3"/>
+  <ellipse cx="100" cy="75" rx="58" ry="44" fill="#f4fbfa" stroke="#9bd9d1" stroke-width="3"/>
+  <ellipse class="eye" cx="76" cy="70" rx="9" ry="13" fill="#17333a"/>
+  <ellipse class="eye" cx="124" cy="70" rx="9" ry="13" fill="#17333a"/>
+  <circle cx="73" cy="64" r="3" fill="#fff"/><circle cx="121" cy="64" r="3" fill="#fff"/>
+  <circle cx="58" cy="88" r="7" fill="#ffb3b3" opacity=".6"/><circle cx="142" cy="88" r="7" fill="#ffb3b3" opacity=".6"/>
+  <ellipse class="mouth" cx="100" cy="90" rx="10" ry="6" fill="#17333a"/>
+  <path class="heart" d="M100 168c-14-10-20-17-20-25a11 11 0 0 1 20-6a11 11 0 0 1 20 6c0 8-6 15-20 25z" fill="#19b5a5"/>
+  <g class="beam"><rect x="20" y="40" width="160" height="6" rx="3" fill="#19b5a5" opacity=".85"/><rect x="20" y="40" width="160" height="22" fill="#19b5a5" opacity=".15"/></g>
+ </g>
+</svg>
+<div id="cam" hidden><video id="vid" playsinline muted></video><div class="cbeam"></div></div>
+<canvas id="cv" width="64" height="48" hidden></canvas>
+<div class="status" id="status">آماده‌ام</div>
+<div class="cfg" id="cfg" hidden>
+ <div>اتصال به هوش مصنوعی: کلید API رو بذار تا نرمو هر سوالی رو جواب بده. کلید فقط توی مرورگر خودت ذخیره می‌شه. خالی بذاری و ذخیره کنی، خاموش می‌شه.</div>
+ <select id="prov"><option value="gemini">Google Gemini (رایگان)</option><option value="groq">Groq (رایگان)</option><option value="openrouter">OpenRouter (مدل‌های رایگان)</option><option value="openai">OpenAI (ChatGPT)</option><option value="anthropic">Anthropic (Claude)</option></select>
+ <input id="mdl" placeholder="model">
+ <input id="key" type="password" placeholder="API key" autocomplete="off">
+ <button id="saveCfg">ذخیره</button>
+</div>
+<div class="msgs" id="msgs"></div>
+<div class="row">
+ <button id="scanBtn">🔍 اسکن</button>
+ <button id="mic" aria-label="میکروفون">🎤</button>
+ <input id="txt" placeholder="یا اینجا بنویس…" enterkeyhint="send" autocomplete="off"><button id="sendBtn" aria-label="ارسال" style="background:var(--acc);color:#fff;width:46px;height:46px;font-size:20px;flex:none">➤</button>
+</div>
+<div class="note">اسکن فقط سرگرمیه و ارزش پزشکی نداره. <button id="tst" style="background:none;color:var(--acc);text-decoration:underline;padding:0 6px">🔊 تست صدا</button></div>
+</div>
+<script>
+const $=id=>document.getElementById(id), bot=$('bot'), msgs=$('msgs');
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null, busy=false, talkTimer=null;
+function setState(s,t){bot.classList.remove('talking','listening','scanning');if(s)bot.classList.add(s);$('status').textContent=t||'آماده‌ام';}
+function add(cls,t){const d=document.createElement('div');d.className='m '+cls;d.textContent=t;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d}
+let voices=[],ttsAudio=null,speakId=0,warned=false;
+function loadVoices(){try{voices=speechSynthesis.getVoices()||[]}catch(e){}}
+if(window.speechSynthesis){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+let lang='fa';const L=(a,b)=>lang==='fa'?a:b;const code=()=>lang==='fa'?'fa-IR':'en-US';
+const faVoice=()=>voices.find(v=>v.lang.replace('_','-').toLowerCase().startsWith(lang==='fa'?'fa':'en'))||(lang==='fa'?voices.find(v=>/persian|farsi|فارسی/i.test(v.name)):null);
+function stopSpeak(){speakId++;try{speechSynthesis.cancel()}catch(e){}if(ttsAudio){try{ttsAudio.pause()}catch(e){}ttsAudio=null}}
+function chunks(t){
+ const parts=t.match(/[^.!؟?،,]+[.!؟?،,]?/g)||[t],out=[];let cur='';
+ for(const p of parts){if((cur+p).length>170&&cur){out.push(cur);cur=p}else cur+=p}
+ if(cur.trim())out.push(cur);return out;
+}
+function speakText(t,done){
+ const id=++speakId,v=faVoice();
+ if(v){
+  const u=new SpeechSynthesisUtterance(t);u.voice=v;u.lang=v.lang;u.rate=.95;
+  u.onend=u.onerror=()=>{if(id===speakId)done()};
+  speechSynthesis.cancel();speechSynthesis.speak(u);return;
+ }
+ const ch=chunks(t);let i=0,fb=false;
+ const fail=()=>{
+  if(!warned){warned=true;add('bot','نتونستم صدای فارسی پخش کنم. توی تنظیمات گوشی ← Text-to-speech، موتور «Speech Services by Google» رو انتخاب کن و زبان فارسی رو دانلود کن. بعد صفحه رو رفرش کن.')}
+  done();
+ };
+ const fallback=()=>{
+  if(fb||id!==speakId)return;fb=true;
+  let started=false;
+  try{
+   const u=new SpeechSynthesisUtterance(t);u.lang='fa-IR';
+   u.onstart=()=>{started=true};
+   u.onend=()=>{if(id===speakId)done()};
+   u.onerror=()=>{if(id===speakId)fail()};
+   speechSynthesis.cancel();speechSynthesis.speak(u);
+   setTimeout(()=>{if(!started&&id===speakId){speechSynthesis.cancel();fail()}},2500);
+  }catch(e){fail()}
+ };
+ const next=()=>{
+  if(id!==speakId)return;
+  if(i>=ch.length){done();return}
+  const q=encodeURIComponent(ch[i++]);let e=0;
+  const EP=[
+   'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl='+lang+'&q=',
+   'https://translate.googleapis.com/translate_tts?ie=UTF-8&client=gtx&tl='+lang+'&q='
+  ];
+  const tryEp=()=>{
+   if(id!==speakId)return;
+   if(e>=EP.length){fail();return}
+   const a=new Audio(EP[e++]+q);let bad=false;
+   const f=()=>{if(bad)return;bad=true;tryEp()};
+   ttsAudio=a;a.onended=next;a.onerror=f;a.play().catch(f);
+  };
+  tryEp();
+ };
+ let started=false,went=false;
+ const go=()=>{if(went||id!==speakId)return;went=true;try{speechSynthesis.cancel()}catch(e){}next()};
+ try{
+  const u=new SpeechSynthesisUtterance(t);u.lang=code();u.rate=.95;
+  u.onstart=()=>{started=true};
+  u.onend=()=>{if(started&&id===speakId)done()};
+  u.onerror=go;
+  speechSynthesis.cancel();speechSynthesis.speak(u);
+  setTimeout(()=>{if(!started)go()},1500);
+ }catch(e){go()}
+}
+const EN=[['به دوربین دسترسی','I can not access the camera. I will do a demo scan instead.'],['دوربین روشن شد','Camera is on. Look at the camera and stay still for a few seconds.'],['چهره','I could not find a face. Add more light, center your face and scan again.'],['اسکن انجام شد','Scan done, but the light is low. Move somewhere brighter.'],['اسکن تموم شد. چهره','Scan complete. Clear face and calm, great! This is only a game, not a doctor.'],['اسکن تموم شد. کمی','Scan complete. You moved a bit. Hold still next time for better accuracy.'],['باشه، اسکن شروع','Okay, scan starting. Please stand still for a moment.'],['اسکن تموم شد. همه','Scan complete. Everything looks fine! Remember, this is only a game, not a doctor.'],['سلام! من نرمو هستم. صدام','Hello! I am Narmo. Can you hear me?'],['سلام! من نرمو هستم. دکمه','Hello! I am Narmo. Tap the microphone and talk to me, or say scan.'],['مرورگرت','Your browser does not support voice recognition. Use Chrome or Safari, or type.'],['اجازه','Microphone permission was not granted. You can type instead.']];
+function say(t){
+ if(lang==='en'){for(const [k,v] of EN){if(t.startsWith(k)){t=v;break}}}
+ add('bot',t);
+ setState('talking','نرمو داره حرف می‌زنه…');
+ clearTimeout(talkTimer);
+ const end=()=>{clearTimeout(talkTimer);if(!busy||!bot.classList.contains('scanning'))setState()};
+ talkTimer=setTimeout(end,t.length*130+3000);
+ try{speakText(t,end)}catch(e){end()}
+}
+const norm=s=>s.replace(/ي/g,'ی').replace(/ك/g,'ک').toLowerCase();
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const rules=[
+ [/اسکن|بررسی|چکاپ|معاینه|scan/,()=>{scan()}],
+ [/سلام|درود|hi|hello/,()=>pick(['سلام! من نرمو هستم. حالت چطوره؟','سلام دوست من! امروز چه کمکی از دستم برمیاد؟'])],
+ [/سردرد|سر درد|سرم درد/,()=>'متاسفم که سرت درد می‌کنه. کمی آب بخور، چند دقیقه استراحت کن و چشمات رو از صفحه دور کن. اگه شدید بود یا ادامه پیدا کرد، حتما به پزشک مراجعه کن.'],
+ [/درد|دل ?درد|ناراحتم/,()=>'شنیدن این برام ناراحت‌کننده‌ست. من پزشک نیستم، ولی اگه درد شدیده یا ادامه داره، لطفا با پزشک صحبت کن. بگو کجات درد می‌کنه؟'],
+ [/غمگین|افسرده|تنهام|استرس|اضطراب|نگران/,()=>'من اینجام و گوش می‌دم. بیا یه نفس عمیق بکشیم. اگه این حس مدام باهاته، صحبت با یه آدم مورد اعتماد یا مشاور خیلی کمک می‌کنه.'],
+ [/نفس/,()=>'باشه. چهار ثانیه دم، چهار ثانیه نگه دار، شش ثانیه بازدم. چند بار تکرار کن.'],
+ [/حالت|چطوری|خوبی/,()=>'من عالیم، چون باتریم پره! تو چطوری؟'],
+ [/اسمت|کی هستی|تو کی/,()=>'من نرمو هستم، یه ربات دوست‌داشتنی که مراقب سلامتی توئه.'],
+ [/جوک|بخند|بامزه/,()=>pick(['چرا کامپیوتر سرما خورد؟ چون ویندوزش رو باز گذاشته بود!','به دکتر گفتم حافظه‌م ضعیفه. گفت از کی؟ گفتم از چی؟']) ],
+ [/آب|تشنه/,()=>'آفرین که یادت افتاد! یه لیوان آب بخور.'],
+ [/خواب|بی ?خواب|خسته/,()=>'بدنت استراحت لازم داره. امشب زودتر بخواب و قبل از خواب از گوشی فاصله بگیر.'],
+ [/ممنون|مرسی|دمت/,()=>'خواهش می‌کنم! خوشحالم که کمکت کردم.'],
+ [/خداحافظ|بای|خدانگهدار/,()=>'خداحافظ! مراقب خودت باش.'],
+];
+const rulesEn=[
+ [/scan|check ?up|examine/,()=>{scan()}],
+ [/hello|\bhi\b|hey/,()=>pick(['Hello! I am Narmo. How are you feeling?','Hi friend! How can I help today?'])],
+ [/headache/,()=>'Sorry about your headache. Drink some water, rest a few minutes and look away from screens. If it is severe or lasts, please see a doctor.'],
+ [/pain|hurt/,()=>'I am sorry you are in pain. I am not a doctor, but if it is severe or lasting, please talk to one. Where does it hurt?'],
+ [/sad|stress|anxious|lonely|worried/,()=>'I am here and I am listening. Let us take a deep breath together. If this feeling stays, talking to someone you trust really helps.'],
+ [/breath/,()=>'Okay. Breathe in for four seconds, hold for four, and out for six. Repeat a few times.'],
+ [/how are you/,()=>'I am great, my battery is full! How are you?'],
+ [/your name|who are you/,()=>'I am Narmo, a friendly robot who looks after your health.'],
+ [/joke|funny/,()=>pick(['Why did the computer catch a cold? It left its Windows open!','I told my doctor I forget things. He asked since when. I said since what?'])],
+ [/water|thirsty/,()=>'Good thinking! Drink a glass of water.'],
+ [/sleep|tired/,()=>'Your body needs rest. Go to bed early tonight and keep your phone away before sleep.'],
+ [/thank/,()=>'You are welcome! I am glad I could help.'],
+ [/bye/,()=>'Goodbye! Take care of yourself.'],
+];
+function ruleReply(t){
+ const n=norm(t);
+ if(lang==='en'){for(const [re,fn] of rulesEn){if(re.test(n)){const r=fn();if(r)say(r);return}}say('Sorry, I did not get that. Try saying scan, or ask how I am.');return}
+ for(const [re,fn] of rules){if(re.test(n)){const r=fn();if(r)say(r);return}}
+ say(pick(['متوجه نشدم. می‌تونی دوباره بگی؟','هنوز یاد نگرفتم این رو جواب بدم. بگو «اسکن» یا بپرس حالم چطوره.']));
+}
+let stream=null;
+async function startCam(){
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw 0;
+ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+ const v=$('vid');v.srcObject=stream;await v.play();
+ bot.style.display='none';$('cam').hidden=false;
+}
+function stopCam(){
+ if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+ $('cam').hidden=true;$('cam').classList.remove('scanning');bot.style.display='';
+}
+function sample(prev){
+ const c=$('cv'),x=c.getContext('2d',{willReadFrequently:true});
+ x.drawImage($('vid'),0,0,64,48);
+ const d=x.getImageData(0,0,64,48).data,cur=new Uint8Array(3072);
+ let b=0,m=0,s=0;
+ for(let i=0,j=0;i<d.length;i+=4,j++){
+  const r=d[i],g=d[i+1],bl=d[i+2],l=(r+g+bl)/3;
+  b+=l;cur[j]=l;if(prev)m+=Math.abs(l-prev[j]);
+  if(r>95&&g>40&&bl>20&&r>g&&r>bl&&r-Math.min(g,bl)>15)s++;
+ }
+ return{cur,b:b/3072,m:prev?m/3072:0,s:s/3072};
+}
+async function scan(){
+ if(busy)return;busy=true;
+ try{await startCam()}catch(e){
+  say('به دوربین دسترسی ندارم (اجازه داده نشده یا این صفحه اجازه نمی‌ده). اسکن نمایشی رو انجام می‌دم.');
+  return fakeScan();
+ }
+ say('دوربین روشن شد. به دوربین نگاه کن و چند ثانیه آروم بمون.');
+ setState('scanning','در حال اسکن با دوربین…');
+ await new Promise(r=>setTimeout(r,1500));
+ $('cam').classList.add('scanning');
+ let prev=null,B=0,M=0,S=0,n=0;
+ for(let i=0;i<20;i++){
+  await new Promise(r=>setTimeout(r,200));
+  const f=sample(prev);prev=f.cur;B+=f.b;M+=f.m;S+=f.s;n++;
+ }
+ B/=n;M/=Math.max(1,n-1);S/=n;
+ let face=S>0.1;
+ try{if(window.FaceDetector){const fs=await new FaceDetector().detect($('vid'));face=fs.length>0}}catch(e){}
+ stopCam();setState();busy=false;
+ const light=B<50?'کم (نور بیشتر لازمه)':B>200?'خیلی زیاد':'مناسب';
+ const calm=M<2?'خیلی آروم':M<6?'آروم':'پرحرکت';
+ const c=document.createElement('div');c.className='scan';
+ c.innerHTML=`<div>🙂 چهره: ${face?'پیدا شد':'پیدا نشد'}</div><div>💡 نور: ${light}</div><div>🧘 ثبات: ${calm}</div><div>🎨 پوست: ${Math.round(S*100)}٪ کادر</div><div style="grid-column:1/3;color:var(--sub)">این چهار مورد از تصویر زنده‌ی دوربین محاسبه شدن.</div>`;
+ msgs.appendChild(c);msgs.scrollTop=msgs.scrollHeight;
+ if(!face)say('چهره‌ای پیدا نکردم. نور رو بیشتر کن و صورتت رو وسط کادر بگیر، بعد دوباره اسکن کن.');
+ else if(B<50)say('اسکن انجام شد، ولی نور کمه. برای نتیجه بهتر جای روشن‌تری برو.');
+ else say(M<6?'اسکن تموم شد. چهره‌ات واضح بود و آروم بودی، عالیه! این فقط یه بازیه و جای پزشک رو نمی‌گیره.':'اسکن تموم شد. کمی تکون خوردی؛ دفعه‌ی بعد آروم‌تر بمون تا دقیق‌تر بشه.');
+}
+function fakeScan(){
+ busy=true;
+ say('باشه، اسکن شروع می‌شه. لطفا یه لحظه آروم بایست.');
+ setTimeout(()=>{
+  setState('scanning','در حال اسکن…');
+  setTimeout(()=>{
+   const hr=62+Math.floor(Math.random()*24),tp=(36.4+Math.random()*.5).toFixed(1),
+   o2=96+Math.floor(Math.random()*4),st=pick(['کم','متوسط','کم']),
+   mood=pick(['خوب','عالی','آروم']);
+   const c=document.createElement('div');c.className='scan';
+   c.innerHTML=`<div>❤️ ضربان: ${hr}</div><div>🌡️ دما: ${tp}</div><div>🫁 اکسیژن: ${o2}٪</div><div>🧠 استرس: ${st}</div><div style="grid-column:1/3">😊 حال کلی: ${mood}</div>`;
+   msgs.appendChild(c);msgs.scrollTop=msgs.scrollHeight;
+   setState();busy=false;
+   say('اسکن تموم شد. همه‌چیز خوب به نظر می‌رسه! یادت باشه این فقط یه بازیه و جای پزشک رو نمی‌گیره.');
+  },3800);
+ },2600);
+}
+const CFG=()=>{try{return JSON.parse(localStorage.getItem('narmo_cfg')||'null')}catch(e){return null}};
+const hist=[],DM={gemini:'gemini-2.5-flash',groq:'llama-3.3-70b-versatile',openrouter:'nvidia/nemotron-3-ultra-550b-a55b:free',openai:'gpt-4o-mini',anthropic:'claude-haiku-5-5'},URLS={openai:'https://api.openai.com/v1/chat/completions',groq:'https://api.groq.com/openai/v1/chat/completions',openrouter:'https://openrouter.ai/api/v1/chat/completions'};
+async function askAI(text){
+ const c=CFG();if(!c||!c.key)return null;
+ const sys=L('تو نرمو هستی، یه ربات مهربون که مراقب سلامتی کاربره. فارسی محاوره‌ای و کوتاه جواب بده (حداکثر سه جمله)، بدون ایموجی و بدون فرمت مارک‌داون. پزشک نیستی و برای مشکل جدی به پزشک ارجاع بده.','You are Narmo, a gentle friendly health companion robot. Reply in short plain spoken English (max 3 sentences), no emoji, no markdown. You are not a doctor; refer serious problems to a doctor.');
+ hist.push({role:'user',text});
+ const h=hist.slice(-8);let out='';
+ if(c.prov==='gemini'){
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(c.model)+':generateContent?key='+encodeURIComponent(c.key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:h.map(m=>({role:m.role==='user'?'user':'model',parts:[{text:m.text}]}))})});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const j=await r.json();out=(j.candidates&&j.candidates[0]&&j.candidates[0].content.parts.map(p=>p.text).join(''))||'';
+ }else if(URLS[c.prov]){
+  const r=await fetch(URLS[c.prov],{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.key},body:JSON.stringify({model:c.model,messages:[{role:'system',content:sys},...h.map(m=>({role:m.role==='user'?'user':'assistant',content:m.text}))]})});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const j=await r.json();out=(j.choices&&j.choices[0]&&j.choices[0].message.content)||'';
+ }else{
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':c.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:c.model,max_tokens:300,system:sys,messages:h.map(m=>({role:m.role==='user'?'user':'assistant',content:m.text}))})});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const j=await r.json();out=(j.content&&j.content[0]&&j.content[0].text)||'';
+ }
+ out=out.replace(/[*#`]/g,'').trim();
+ if(!out){hist.pop();return null}
+ hist.push({role:'bot',text:out});return out;
+}
+async function reply(t){
+ const c=CFG();
+ if(c&&c.key&&!/اسکن|scan|check ?up/.test(norm(t))){
+  setState(null,L('نرمو داره فکر می‌کنه…','Narmo is thinking…'));
+  try{const a=await askAI(t);if(a){say(a);return}}
+  catch(e){hist.pop();add('bot',L('به هوش مصنوعی وصل نشدم ('+e.message+'). با جواب‌های ساده ادامه می‌دم.','Could not reach the AI ('+e.message+'). Using simple answers.'))}
+  setState();
+ }
+ ruleReply(t);
+}
+function send(t){t=t.trim();if(!t)return;add('usr',t);reply(t)}
+const doSend=()=>{const v=$('txt').value;if(!v.trim())return;$('txt').value='';stopSpeak();send(v)};
+$('txt').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doSend()}});
+$('sendBtn').onclick=doSend;
+$('cfgBtn').onclick=()=>{
+ const c=CFG()||{};$('prov').value=c.prov||'gemini';
+ $('mdl').value=c.model||DM[$('prov').value];$('key').value=c.key||'';
+ $('cfg').hidden=!$('cfg').hidden;
+};
+$('prov').onchange=()=>{$('mdl').value=DM[$('prov').value]};
+$('saveCfg').onclick=()=>{
+ const k=$('key').value.trim();
+ try{if(k)localStorage.setItem('narmo_cfg',JSON.stringify({prov:$('prov').value,model:$('mdl').value.trim()||DM[$('prov').value],key:k}));else localStorage.removeItem('narmo_cfg')}catch(e){}
+ hist.length=0;$('cfg').hidden=true;
+ say(k?L('هوش مصنوعی وصل شد. هر چی می‌خوای بپرس.','AI connected. Ask me anything.'):L('هوش مصنوعی خاموش شد.','AI turned off.'));
+};
+$('lng').onclick=()=>{
+ stopSpeak();lang=lang==='fa'?'en':'fa';
+ $('lng').textContent=L('EN','فارسی');
+ document.documentElement.dir=L('rtl','ltr');
+ $('txt').placeholder=L('یا اینجا بنویس…','Or type here…');
+ $('scanBtn').textContent=L('🔍 اسکن','🔍 Scan');
+ $('tst').textContent=L('🔊 تست صدا','🔊 Test voice');
+ loadVoices();
+ say(L('زبان فارسی شد. سلام! من نرمو هستم. صدام رو می‌شنوی؟','Hello! I am Narmo. Can you hear me?'));
+};
+$('tst').onclick=()=>{
+ loadVoices();warned=false;
+ add('bot',`صداهای نصب‌شده: ${voices.length} | صدای فارسی: ${faVoice()?'دارد':'ندارد (از اینترنت استفاده می‌کنم)'}`);
+ say('سلام! من نرمو هستم. صدام رو می‌شنوی؟');
+};
+$('scanBtn').onclick=()=>{add('usr','اسکن');scan()};
+$('mic').onclick=()=>{
+ if(!SR){say('مرورگرت تشخیص صدا رو پشتیبانی نمی‌کنه. لطفا از Chrome یا Safari استفاده کن یا تایپ کن.');return}
+ if(rec){rec.stop();return}
+ stopSpeak();
+ rec=new SR();rec.lang=code();rec.interimResults=false;
+ rec.onstart=()=>{$('mic').classList.add('on');setState('listening','دارم گوش می‌دم…')};
+ rec.onresult=e=>send(e.results[0][0].transcript);
+ rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed')say('اجازه‌ی میکروفون داده نشده. می‌تونی تایپ کنی.')};
+ rec.onend=()=>{$('mic').classList.remove('on');rec=null;if(!bot.classList.contains('talking')&&!bot.classList.contains('scanning'))setState()};
+ rec.start();
+};
+add('bot','سلام! من نرمو هستم. یه جای صفحه رو لمس کن تا صدام رو بشنوی.');
+let greeted=false;
+document.addEventListener('pointerdown',e=>{
+ if(greeted)return;greeted=true;
+ if(!e.target.closest('button,input'))say('سلام! من نرمو هستم. دکمه‌ی میکروفون رو بزن و باهام حرف بزن، یا بگو اسکن.');
+});
+</script>
+</body>
+</html>
